@@ -1,6 +1,7 @@
 import { defineEventHandler, readBody, createError } from 'h3';
 import { useRuntimeConfig } from '#imports';
 import { buildCreatePersonRequest } from '~/server/utils/buildRequests';
+import { fetchPersons } from '~/server/utils/fetchPersons';
 
 /**
  * Валідація вхідних даних для створення клієнта
@@ -37,12 +38,18 @@ export default defineEventHandler(async (event) => {
     const formData = new URLSearchParams();
     formData.append('packet', JSON.stringify(packet));
 
-    const response = await $fetch(config.public.apiBaseUrl, {
+    await $fetch(config.public.apiBaseUrl, {
       method: 'POST',
       body: formData
     });
 
-    return { success: true, data: response };
+    // Отримуємо оновлений список персон
+    const updatedPersons = await fetchPersons(
+      config.public.apiBaseUrl,
+      config.dilovodApiKey
+    );
+
+    return { success: true, persons: updatedPersons };
   } catch (error) {
     console.error('❌ Помилка створення клієнта:', error);
     throw createError({

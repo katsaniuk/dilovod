@@ -246,11 +246,14 @@ async function submitOrder() {
     let customer;
     if (!customerExists.value) {
       const newCustomer = await createCustomer();
-      console.log('Новий клієнт:', newCustomer);
-      const customerData = newCustomer?.data;
-      if (customerData?.id) {
-        customer = { ...customerData, person_id: customerData.id };
+      const customerData = newCustomer?.persons[0];
+
+      if (customerData?.person_id) {
+        customer = { ...customerData, person_id: customerData.person_id };
         persons.value.push(customer);
+
+        await loadPersons();
+
         customerExists.value = true;
         setMessage('Новий покупець успішно зареєстрований!');
       } else {
@@ -262,7 +265,7 @@ async function submitOrder() {
       );
     }
     if (!customer) {
-      setMessage('Помилка отримання ID клієнта', true);
+      setMessage('Помилка отримання person_id клієнта', true);
       return;
     }
 
@@ -272,11 +275,12 @@ async function submitOrder() {
         personId: customer.person_id,
         goods: selectedProducts.value.map((product) => ({
           good: product.good,
-          qty: product.quantity
+          qty: product.quantity,
+          price: product.price,
+          priceAmount: product.totalFormatted
         }))
       }
     });
-
     if (response.data?.header?.number) {
       setMessage(`Документ успішно створено № ${response.data.header.number}`);
       resetForm();

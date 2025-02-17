@@ -1,11 +1,10 @@
-// server/api/saleOrderCreate.ts
 import { defineEventHandler } from 'h3';
 
 export default defineEventHandler(async (event) => {
   const config = useRuntimeConfig();
   const body = await readBody(event);
 
-  const apiUrl = `${config.public.apiBaseUrl}`; // Замініть на правильний шлях до вашого API
+  const apiUrl = `${config.public.apiBaseUrl}`;
   const apiKey = config.dilovodApiKey;
 
   const requestData = {
@@ -20,10 +19,19 @@ export default defineEventHandler(async (event) => {
           person: body.personId,
           remarkFromPerson: 'call me please'
         },
-        goods: body.goods.map((item: { good: string; qty: number }) => ({
-          good: item.good,
-          qty: item.qty
-        }))
+        goods: body.goods.map(
+          (item: {
+            good: string;
+            qty: number;
+            price: number;
+            totalFormatted: number;
+          }) => ({
+            good: item.good,
+            qty: item.qty,
+            price: item.price,
+            priceAmount: item.totalFormatted
+          })
+        )
       }
     }
   };
@@ -34,7 +42,7 @@ export default defineEventHandler(async (event) => {
       body: JSON.stringify(requestData)
     });
 
-    return response; // Повертаємо відповідь з API
+    return response;
   } catch (error) {
     throw createError({
       statusCode: 500,
