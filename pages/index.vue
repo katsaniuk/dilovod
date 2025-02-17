@@ -246,12 +246,13 @@ async function submitOrder() {
     let customer;
     if (!customerExists.value) {
       const newCustomer = await createCustomer();
-      const customerData = newCustomer?.persons[0];
+      const customerData = newCustomer?.persons[newCustomer.persons.length - 1];
+      console.log('customerData', customerData);
+      console.log('newCustomer', newCustomer);
 
       if (customerData?.person_id) {
         customer = { ...customerData, person_id: customerData.person_id };
         persons.value.push(customer);
-
         await loadPersons();
 
         customerExists.value = true;
